@@ -7,7 +7,7 @@ import type { useProgress } from "../hooks/useProgress";
 
 const WORDS = words as Word[];
 
-const LEVEL_FILTERS: ("all" | CefrLevel)[] = ["all", "A1", "A2"];
+const LEVEL_FILTERS: ("all" | CefrLevel)[] = ["all", "A1", "A2", "B1", "B2"];
 const STATUS_FILTERS: ("all" | WordStatus)[] = ["all", "new", "learning", "review", "learned"];
 
 interface Props {
