@@ -1,4 +1,4 @@
-export type Tab = "study" | "words" | "stats";
+export type Tab = "study" | "reverse" | "words" | "stats";
 
 interface Props {
   active: Tab;
@@ -7,6 +7,7 @@ interface Props {
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "study", label: "Учиться", icon: "🎯" },
+  { id: "reverse", label: "RU→EN", icon: "🔁" },
   { id: "words", label: "Слова", icon: "📖" },
   { id: "stats", label: "Прогресс", icon: "📊" },
 ];

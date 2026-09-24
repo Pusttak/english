@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AppStats, Grade, ProgressMap, WordProgress } from "../types";
-import { loadProgress, loadStats, saveProgress, saveStats } from "../lib/storage";
+import { EN_RU_KEYS, loadProgress, loadStats, saveProgress, saveStats, type StorageKeys } from "../lib/storage";
 import { createNewProgress, markLearned, resetProgress, reviewWord, todayISO } from "../lib/srs";
 
 function ensureLog(stats: AppStats, date: string): AppStats {
@@ -11,12 +11,12 @@ function ensureLog(stats: AppStats, date: string): AppStats {
   };
 }
 
-export function useProgress() {
-  const [progress, setProgress] = useState<ProgressMap>(() => loadProgress());
-  const [stats, setStats] = useState<AppStats>(() => loadStats());
+export function useProgress(keys: StorageKeys = EN_RU_KEYS) {
+  const [progress, setProgress] = useState<ProgressMap>(() => loadProgress(keys));
+  const [stats, setStats] = useState<AppStats>(() => loadStats(keys));
 
-  useEffect(() => saveProgress(progress), [progress]);
-  useEffect(() => saveStats(stats), [stats]);
+  useEffect(() => saveProgress(progress, keys), [progress, keys]);
+  useEffect(() => saveStats(stats, keys), [stats, keys]);
 
   const today = todayISO();
   const todayLog = stats.log[today] ?? { date: today, reviews: 0, correct: 0, newWords: 0 };

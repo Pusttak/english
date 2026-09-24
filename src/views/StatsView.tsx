@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import words from "../data/words.json";
 import type { Word, WordStatus } from "../types";
+import { REVERSE_CARDS } from "../lib/concepts";
 import { computeStreak, last7DaysLog } from "../lib/statsCalc";
 import { STATUS_COLORS, STATUS_LABELS } from "../lib/ui";
 import type { useProgress } from "../hooks/useProgress";
@@ -10,9 +11,28 @@ const STATUSES: WordStatus[] = ["new", "learning", "review", "learned"];
 
 interface Props {
   progressApi: ReturnType<typeof useProgress>;
+  reverseApi: ReturnType<typeof useProgress>;
 }
 
-export function StatsView({ progressApi }: Props) {
+function StatusBars({ counts, total }: { counts: Record<WordStatus, number>; total: number }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {STATUSES.map((s) => (
+        <div key={s} className="flex items-center gap-2">
+          <span className={`w-24 shrink-0 rounded-full px-2 py-0.5 text-center text-[11px] font-semibold ${STATUS_COLORS[s]}`}>
+            {STATUS_LABELS[s]}
+          </span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+            <div className="h-full rounded-full bg-violet-500" style={{ width: `${(counts[s] / total) * 100}%` }} />
+          </div>
+          <span className="w-8 text-right text-xs text-gray-400">{counts[s]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function StatsView({ progressApi, reverseApi }: Props) {
   const { progress, stats, todayLog, setDailyNewGoal } = progressApi;
 
   const counts = useMemo(() => {
@@ -29,6 +49,14 @@ export function StatsView({ progressApi }: Props) {
   const streak = computeStreak(stats);
   const week = last7DaysLog(stats);
   const accuracyToday = todayLog.reviews ? Math.round((todayLog.correct / todayLog.reviews) * 100) : null;
+
+  const reverseCounts = useMemo(() => {
+    const c: Record<WordStatus, number> = { new: 0, learning: 0, review: 0, learned: 0 };
+    for (const card of REVERSE_CARDS) {
+      c[reverseApi.progress[card.id]?.status ?? "new"] += 1;
+    }
+    return c;
+  }, [reverseApi.progress]);
 
   const byLevel = useMemo(() => {
     const levels: Record<string, { total: number; learned: number }> = {};
@@ -68,22 +96,15 @@ export function StatsView({ progressApi }: Props) {
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <p className="mb-3 text-sm font-semibold text-gray-700">По статусу</p>
-        <div className="flex flex-col gap-2">
-          {STATUSES.map((s) => (
-            <div key={s} className="flex items-center gap-2">
-              <span className={`w-24 shrink-0 rounded-full px-2 py-0.5 text-center text-[11px] font-semibold ${STATUS_COLORS[s]}`}>
-                {STATUS_LABELS[s]}
-              </span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
-                <div
-                  className="h-full rounded-full bg-violet-500"
-                  style={{ width: `${(counts[s] / total) * 100}%` }}
-                />
-              </div>
-              <span className="w-8 text-right text-xs text-gray-400">{counts[s]}</span>
-            </div>
-          ))}
-        </div>
+        <StatusBars counts={counts} total={total} />
+      </div>
+
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <p className="mb-1 text-sm font-semibold text-gray-700">RU → EN</p>
+        <p className="mb-3 text-xs text-gray-400">
+          {REVERSE_CARDS.length} карточек · повторений сегодня: {reverseApi.todayLog.reviews}
+        </p>
+        <StatusBars counts={reverseCounts} total={REVERSE_CARDS.length} />
       </div>
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
