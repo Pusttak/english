@@ -1,28 +1,46 @@
 import { useMemo, useState } from "react";
 import type { CefrLevel, Grade } from "../types";
-import { buildReverseQueue, CONCEPTS, LEVELS, type ReverseQueueItem } from "../lib/concepts";
+import {
+  buildReverseQueue,
+  CONCEPTS,
+  LEVELS,
+  type ReverseQueueItem,
+} from "../lib/concepts";
 import { loadReverseLevels, saveReverseLevels } from "../lib/storage";
 import { LEVEL_COLORS } from "../lib/ui";
 import { ReverseFlashcard } from "../components/ReverseFlashcard";
 import { GradeButtons } from "../components/GradeButtons";
 import type { useProgress } from "../hooks/useProgress";
 
-const CARD_BY_ID = new Map(CONCEPTS.flatMap((c) => c.cards).map((card) => [card.id, card]));
+const CARD_BY_ID = new Map(
+  CONCEPTS.flatMap((c) => c.cards).map((card) => [card.id, card]),
+);
 
 interface Props {
   progressApi: ReturnType<typeof useProgress>;
 }
 
 export function ReverseView({ progressApi }: Props) {
-  const { progress, review, todayLog, stats, setDailyNewGoal, newWordsRemaining } = progressApi;
-  const [levels, setLevels] = useState<CefrLevel[]>(() => loadReverseLevels(LEVELS));
+  const {
+    progress,
+    review,
+    todayLog,
+    stats,
+    setDailyNewGoal,
+    newWordsRemaining,
+  } = progressApi;
+  const [levels, setLevels] = useState<CefrLevel[]>(() =>
+    loadReverseLevels(LEVELS),
+  );
   const [queue, setQueue] = useState<ReverseQueueItem[] | null>(null);
   const [revealed, setRevealed] = useState(false);
 
   const levelSet = useMemo(() => new Set(levels), [levels]);
 
   const toggleLevel = (level: CefrLevel) => {
-    const next = levelSet.has(level) ? levels.filter((l) => l !== level) : [...levels, level];
+    const next = levelSet.has(level)
+      ? levels.filter((l) => l !== level)
+      : [...levels, level];
     if (next.length === 0) return;
     setLevels(next);
     saveReverseLevels(next);
@@ -40,9 +58,12 @@ export function ReverseView({ progressApi }: Props) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-5xl">🔁</p>
-        <h2 className="text-xl font-semibold text-gray-800">Русский → английский</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Русский → английский
+        </h2>
         <p className="max-w-xs text-sm text-gray-500">
-          Слова с одним смыслом собраны вместе: сначала простое слово, потом более сложные синонимы.
+          Слова с одним смыслом собраны вместе: сначала простое слово, потом
+          более сложные синонимы.
         </p>
 
         <div className="flex gap-2">
@@ -52,7 +73,9 @@ export function ReverseView({ progressApi }: Props) {
               type="button"
               onClick={() => toggleLevel(level)}
               className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${
-                levelSet.has(level) ? LEVEL_COLORS[level] : "bg-gray-100 text-gray-400"
+                levelSet.has(level)
+                  ? LEVEL_COLORS[level]
+                  : "bg-gray-100 text-gray-400"
               }`}
             >
               {level}
@@ -65,13 +88,15 @@ export function ReverseView({ progressApi }: Props) {
           <input
             type="range"
             min={5}
-            max={50}
+            max={500}
             step={5}
             value={stats.dailyNewGoal}
             onChange={(e) => setDailyNewGoal(Number(e.target.value))}
             className="flex-1"
           />
-          <span className="w-6 text-right text-sm font-semibold text-gray-700">{stats.dailyNewGoal}</span>
+          <span className="w-6 text-right text-sm font-semibold text-gray-700">
+            {stats.dailyNewGoal}
+          </span>
         </div>
 
         <p className="text-sm text-gray-500">
@@ -98,10 +123,15 @@ export function ReverseView({ progressApi }: Props) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
         <p className="text-5xl">🎉</p>
-        <h2 className="text-xl font-semibold text-gray-800">Сессия завершена!</h2>
+        <h2 className="text-xl font-semibold text-gray-800">
+          Сессия завершена!
+        </h2>
         <p className="text-sm text-gray-500">
           Повторений сегодня: {todayLog.reviews} · Точность:{" "}
-          {todayLog.reviews ? Math.round((todayLog.correct / todayLog.reviews) * 100) : 0}%
+          {todayLog.reviews
+            ? Math.round((todayLog.correct / todayLog.reviews) * 100)
+            : 0}
+          %
         </p>
         <button
           type="button"
