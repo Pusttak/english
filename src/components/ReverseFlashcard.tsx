@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Word } from "../types";
 import type { ReverseCard } from "../lib/concepts";
 import { speak } from "../lib/speech";
@@ -28,6 +29,9 @@ function WordChips({ words }: { words: Word[] }) {
 
 export function ReverseFlashcard({ card, known, revealed, onReveal }: Props) {
   const multi = card.words.length > 1;
+  const [hintShown, setHintShown] = useState(false);
+  // пример на русском для самого простого слова из карточки — этого достаточно для контекста
+  const hintExample = card.words[0].example_ru;
 
   return (
     <div className="flex min-h-[420px] w-full flex-col items-center gap-4 rounded-3xl bg-white p-6 shadow-sm">
@@ -50,6 +54,19 @@ export function ReverseFlashcard({ card, known, revealed, onReveal }: Props) {
         {multi && !revealed && (
           <p className="text-sm text-gray-400">Вариантов на этом уровне: {card.words.length}</p>
         )}
+
+        {!revealed &&
+          (hintShown ? (
+            <p className="text-sm text-gray-500 italic">{hintExample}</p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setHintShown(true)}
+              className="text-sm font-medium text-violet-500 active:text-violet-700"
+            >
+              Показать пример
+            </button>
+          ))}
 
         {revealed && (
           <div className="mt-4 flex w-full flex-col gap-3 border-t border-gray-100 pt-4">
